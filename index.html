@@ -239,6 +239,31 @@ tr:last-child td{border-bottom:none;}
 .endorsement-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
 .endorsement-subject{font-size:14px;font-weight:500;color:var(--white);}
 .endorsement-meta{font-size:11px;color:var(--white-faint);margin-top:4px;}
+/* ── FOLIO ── */
+.folio-header{background:var(--navy-light);border:1px solid var(--navy-border);border-radius:var(--radius);padding:16px 20px;margin-bottom:16px;}
+.folio-balance{font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:300;line-height:1;}
+.folio-balance.zero{color:var(--green-light);}
+.folio-balance.owed{color:var(--amber-light);}
+.folio-balance.credit{color:var(--blue-light);}
+.folio-ledger{width:100%;border-collapse:collapse;}
+.folio-ledger th{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--white-faint);padding:8px 10px;text-align:left;border-bottom:1px solid var(--navy-border);white-space:nowrap;position:sticky;top:0;background:var(--navy-mid);z-index:1;}
+.folio-ledger td{padding:9px 10px;border-bottom:1px solid rgba(36,61,92,0.3);font-size:12px;vertical-align:middle;}
+.folio-ledger tr:hover td{background:rgba(255,255,255,0.02);}
+.folio-ledger tr.charge-row td{color:var(--white-dim);}
+.folio-ledger tr.payment-row td{color:var(--green-light);}
+.folio-ledger tr.void-row td{color:var(--white-faint);text-decoration:line-through;opacity:0.5;}
+.folio-ledger tr.adjustment-row td{color:var(--amber-light);}
+.folio-ledger .dr{color:var(--white);font-weight:500;}
+.folio-ledger .cr{color:var(--green-light);font-weight:500;}
+.folio-ledger .bal{font-weight:600;}
+.folio-ledger .bal.owed{color:var(--amber-light);}
+.folio-ledger .bal.zero{color:var(--green-light);}
+.folio-ledger .bal.credit{color:var(--blue-light);}
+.folio-action-bar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center;}
+.checkout-blocked{background:rgba(192,57,43,0.12);border:1px solid rgba(192,57,43,0.3);border-radius:var(--radius);padding:12px 16px;display:flex;align-items:center;gap:10px;font-size:13px;color:var(--red-light);}
+.checkout-ready{background:rgba(46,125,94,0.12);border:1px solid rgba(46,125,94,0.3);border-radius:var(--radius);padding:12px 16px;display:flex;align-items:center;gap:10px;font-size:13px;color:var(--green-light);}
+.ref-badge{display:inline-block;background:var(--navy-light);border:1px solid var(--navy-border);border-radius:3px;padding:1px 6px;font-size:10px;color:var(--white-faint);margin-left:4px;}
+.folio-section{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--white-faint);padding:6px 10px;background:rgba(255,255,255,0.02);border-bottom:1px solid var(--navy-border);}
 /* ── PRINT ── */
 @media print{
   #sidebar,#topbar,.no-print{display:none!important;}
@@ -455,6 +480,81 @@ const BILLING = [
    subtotal:8400,totalDiscount:1680,totalTax:840,grandTotal:7560,amountPaid:7560,balance:0,
    createdAt:'2026-03-20T10:45:00',createdBy:'s3'},
 ];
+
+// ── FOLIOS (Guest Ledger) ──
+// Each folio = one reservation's running account
+// Line items are chronological — charges (Dr) and payments (Cr)
+const FOLIOS = [
+  // Pre-existing folio for checked-out res6 (Pedro Santos)
+  {id:'f1',resId:'res6',guestId:'g3',roomId:'r8',status:'closed',createdAt:fmt(addDays(today,-5))+'T13:00:00',closedAt:fmt(addDays(today,-2))+'T11:00:00',
+   lines:[
+    {id:'fl1',entryType:'charge',chargeType:'Room Rate',desc:'Room Rate — Deluxe (Night 1)',voucherNum:'',amount_dr:2800,amount_cr:0,runBal:2800,payMethod:'',receiptType:'',receiptNum:'',cardLast4:'',cardType:'',cardApproval:'',postedBy:'s3',postedAt:fmt(addDays(today,-5))+'T13:05:00',voided:false},
+    {id:'fl2',entryType:'charge',chargeType:'Room Rate',desc:'Room Rate — Deluxe (Night 2)',voucherNum:'',amount_dr:2800,amount_cr:0,runBal:5600,payMethod:'',receiptType:'',receiptNum:'',cardLast4:'',cardType:'',cardApproval:'',postedBy:'system',postedAt:fmt(addDays(today,-4))+'T00:01:00',voided:false},
+    {id:'fl3',entryType:'charge',chargeType:'Room Rate',desc:'Room Rate — Deluxe (Night 3)',voucherNum:'',amount_dr:2800,amount_cr:0,runBal:8400,payMethod:'',receiptType:'',receiptNum:'',cardLast4:'',cardType:'',cardApproval:'',postedBy:'system',postedAt:fmt(addDays(today,-3))+'T00:01:00',voided:false},
+    {id:'fl4',entryType:'charge',chargeType:'Service Charge',desc:'Service Charge 10%',voucherNum:'',amount_dr:840,amount_cr:0,runBal:9240,payMethod:'',receiptType:'',receiptNum:'',cardLast4:'',cardType:'',cardApproval:'',postedBy:'s3',postedAt:fmt(addDays(today,-2))+'T10:45:00',voided:false},
+    {id:'fl5',entryType:'discount',chargeType:'PWD Discount',desc:'PWD Discount 20% — ID: PWD-00123',voucherNum:'',amount_dr:0,amount_cr:1680,runBal:7560,payMethod:'',receiptType:'',receiptNum:'',cardLast4:'',cardType:'',cardApproval:'',postedBy:'s3',postedAt:fmt(addDays(today,-2))+'T10:46:00',voided:false},
+    {id:'fl6',entryType:'payment',chargeType:'',desc:'Payment — Cash',voucherNum:'',amount_dr:0,amount_cr:7560,runBal:0,payMethod:'Cash',receiptType:'OR',receiptNum:'OR-2026-00451',cardLast4:'',cardType:'',cardApproval:'',postedBy:'s3',postedAt:fmt(addDays(today,-2))+'T11:00:00',voided:false},
+  ]},
+];
+
+// Active folios for checked-in reservations
+const ACTIVE_FOLIOS = [
+  // res1 — Ana Gomez, Room 104, 3 nights in
+  {id:'af1',resId:'res1',guestId:'g4',roomId:'r4',status:'open',createdAt:fmt(addDays(today,-2))+'T15:00:00',closedAt:'',
+   lines:[
+    {id:'afl1',entryType:'charge',chargeType:'Room Rate',desc:'Room Rate — Deluxe (Night 1)',voucherNum:'',amount_dr:2800,amount_cr:0,runBal:2800,payMethod:'',receiptType:'',receiptNum:'',cardLast4:'',cardType:'',cardApproval:'',postedBy:'s3',postedAt:fmt(addDays(today,-2))+'T15:05:00',voided:false},
+    {id:'afl2',entryType:'payment',chargeType:'',desc:'Advance Payment — GCash',voucherNum:'',amount_dr:0,amount_cr:2000,runBal:800,payMethod:'GCash',receiptType:'AR',receiptNum:'AR-2026-00112',cardLast4:'',cardType:'',cardApproval:'',postedBy:'s3',postedAt:fmt(addDays(today,-2))+'T15:10:00',voided:false},
+    {id:'afl3',entryType:'charge',chargeType:'Room Rate',desc:'Room Rate — Deluxe (Night 2)',voucherNum:'',amount_dr:2800,amount_cr:0,runBal:3600,payMethod:'',receiptType:'',receiptNum:'',cardLast4:'',cardType:'',cardApproval:'',postedBy:'system',postedAt:fmt(addDays(today,-1))+'T00:01:00',voided:false},
+    {id:'afl4',entryType:'charge',chargeType:'Restaurant',desc:'Restaurant Charge — Dinner',voucherNum:'CV-2026-0234',amount_dr:850,amount_cr:0,runBal:4450,payMethod:'',receiptType:'',receiptNum:'',cardLast4:'',cardType:'',cardApproval:'',postedBy:'s3',postedAt:fmt(addDays(today,-1))+'T20:30:00',voided:false},
+    {id:'afl5',entryType:'charge',chargeType:'Room Rate',desc:'Room Rate — Deluxe (Night 3)',voucherNum:'',amount_dr:2800,amount_cr:0,runBal:7250,payMethod:'',receiptType:'',receiptNum:'',cardLast4:'',cardType:'',cardApproval:'',postedBy:'system',postedAt:fmt(today)+'T00:01:00',voided:false},
+    {id:'afl6',entryType:'discount',chargeType:'Loyalty Discount',desc:'Loyalty Discount 10% (Gold Member)',voucherNum:'',amount_dr:0,amount_cr:840,runBal:6410,payMethod:'',receiptType:'',receiptNum:'',cardLast4:'',cardType:'',cardApproval:'',postedBy:'s3',postedAt:fmt(today)+'T08:00:00',voided:false},
+  ]},
+  // res2 — Roberto Cruz, Room 201
+  {id:'af2',resId:'res2',guestId:'g5',roomId:'r5',status:'open',createdAt:fmt(today)+'T14:30:00',closedAt:'',
+   lines:[
+    {id:'afl7',entryType:'charge',chargeType:'Room Rate',desc:'Room Rate — Deluxe (Night 1)',voucherNum:'',amount_dr:2800,amount_cr:0,runBal:2800,payMethod:'',receiptType:'',receiptNum:'',cardLast4:'',cardType:'',cardApproval:'',postedBy:'s3',postedAt:fmt(today)+'T14:35:00',voided:false},
+   ]},
+  // res3 — Liza Torres, Room 403
+  {id:'af3',resId:'res3',guestId:'g6',roomId:'r15',status:'open',createdAt:fmt(addDays(today,-1))+'T16:00:00',closedAt:'',
+   lines:[
+    {id:'afl8',entryType:'charge',chargeType:'Room Rate',desc:'Room Rate — Deluxe (Night 1)',voucherNum:'',amount_dr:2800,amount_cr:0,runBal:2800,payMethod:'',receiptType:'',receiptNum:'',cardLast4:'',cardType:'',cardApproval:'',postedBy:'s2',postedAt:fmt(addDays(today,-1))+'T16:05:00',voided:false},
+    {id:'afl9',entryType:'charge',chargeType:'Extra Bed',desc:'Extra Bed (Night 1)',voucherNum:'',amount_dr:500,amount_cr:0,runBal:3300,payMethod:'',receiptType:'',receiptNum:'',cardLast4:'',cardType:'',cardApproval:'',postedBy:'s2',postedAt:fmt(addDays(today,-1))+'T16:06:00',voided:false},
+    {id:'afl10',entryType:'charge',chargeType:'Room Rate',desc:'Room Rate — Deluxe (Night 2)',voucherNum:'',amount_dr:2800,amount_cr:0,runBal:6100,payMethod:'',receiptType:'',receiptNum:'',cardLast4:'',cardType:'',cardApproval:'',postedBy:'system',postedAt:fmt(today)+'T00:01:00',voided:false},
+    {id:'afl11',entryType:'charge',chargeType:'Extra Bed',desc:'Extra Bed (Night 2)',voucherNum:'',amount_dr:500,amount_cr:0,runBal:6600,payMethod:'',receiptType:'',receiptNum:'',cardLast4:'',cardType:'',cardApproval:'',postedBy:'system',postedAt:fmt(today)+'T00:01:00',voided:false},
+    {id:'afl12',entryType:'payment',chargeType:'',desc:'Payment — Visa (Corporate)',voucherNum:'',amount_dr:0,amount_cr:3000,runBal:3600,payMethod:'Visa/MC',receiptType:'AR',receiptNum:'AR-2026-00114',cardLast4:'4521',cardType:'Visa',cardApproval:'APC-7823',postedBy:'s2',postedAt:fmt(today)+'T09:00:00',voided:false},
+   ]},
+  // res5 — Juan Dela Cruz, Room 303 (Due Out today)
+  {id:'af4',resId:'res5',guestId:'g1',roomId:'r11',status:'open',createdAt:fmt(addDays(today,-3))+'T11:30:00',closedAt:'',
+   lines:[
+    {id:'afl13',entryType:'charge',chargeType:'Room Rate',desc:'Room Rate — Family (Night 1)',voucherNum:'',amount_dr:3800,amount_cr:0,runBal:3800,payMethod:'',receiptType:'',receiptNum:'',cardLast4:'',cardType:'',cardApproval:'',postedBy:'s3',postedAt:fmt(addDays(today,-3))+'T11:35:00',voided:false},
+    {id:'afl14',entryType:'charge',chargeType:'Room Rate',desc:'Room Rate — Family (Night 2)',voucherNum:'',amount_dr:3800,amount_cr:0,runBal:7600,payMethod:'',receiptType:'',receiptNum:'',cardLast4:'',cardType:'',cardApproval:'',postedBy:'system',postedAt:fmt(addDays(today,-2))+'T00:01:00',voided:false},
+    {id:'afl15',entryType:'charge',chargeType:'Room Rate',desc:'Room Rate — Family (Night 3)',voucherNum:'',amount_dr:3800,amount_cr:0,runBal:11400,payMethod:'',receiptType:'',receiptNum:'',cardLast4:'',cardType:'',cardApproval:'',postedBy:'system',postedAt:fmt(addDays(today,-1))+'T00:01:00',voided:false},
+    {id:'afl16',entryType:'discount',chargeType:'Senior Citizen Discount',desc:'Senior Citizen Discount 20% + VAT Exempt — SC ID: SC-001234',voucherNum:'',amount_dr:0,amount_cr:2280,runBal:9120,payMethod:'',receiptType:'',receiptNum:'',cardLast4:'',cardType:'',cardApproval:'',postedBy:'s3',postedAt:fmt(today)+'T07:00:00',voided:false},
+    {id:'afl17',entryType:'charge',chargeType:'Loyalty Discount',desc:'Loyalty Discount 10% (Gold Member) AH-00123',voucherNum:'',amount_dr:0,amount_cr:912,runBal:8208,payMethod:'',receiptType:'',receiptNum:'',cardLast4:'',cardType:'',cardApproval:'',postedBy:'s3',postedAt:fmt(today)+'T07:01:00',voided:false},
+    {id:'afl18',entryType:'charge',chargeType:'Service Charge',desc:'Service Charge 10%',voucherNum:'',amount_dr:821,amount_cr:0,runBal:9029,payMethod:'',receiptType:'',receiptNum:'',cardLast4:'',cardType:'',cardApproval:'',postedBy:'s3',postedAt:fmt(today)+'T07:02:00',voided:false},
+   ]},
+];
+
+let folioLineCounter = 100;
+function nextFolioLineId(){ return 'fl'+(folioLineCounter++); }
+
+function getFolio(resId){
+  return ACTIVE_FOLIOS.find(f=>f.resId===resId) || FOLIOS.find(f=>f.resId===resId) || null;
+}
+
+function getFolioBalance(folio){
+  if(!folio) return 0;
+  const active = folio.lines.filter(l=>!l.voided);
+  return active.reduce((s,l)=>s + l.amount_dr - l.amount_cr, 0);
+}
+
+function recomputeRunningBal(folio){
+  let bal = 0;
+  folio.lines.forEach(l=>{
+    if(!l.voided){ bal += l.amount_dr - l.amount_cr; l.runBal = bal; }
+    else { l.runBal = bal; }
+  });
+}
 
 const HK_TASKS = [
   {id:'hk1',roomId:'r2',taskType:'Room Cleaning',assignedTo:['s5'],status:'pending',scheduledDate:fmt(today),notes:'Standard turnover after checkout',createdBy:'s2',createdAt:fmt(today),completedAt:'',supervisorNotes:''},
@@ -684,7 +784,8 @@ function renderDashboard(){
   const dueOut = RESERVATIONS.filter(r=>r.status==='checked_in'&&isToday(r.checkOut)).length;
   const oor = ROOMS.filter(r=>['oor','pa'].includes(r.status)).length;
   const occRate = Math.round((occupied/ROOMS.length)*100);
-  const todayRev = BILLING.filter(b=>b.payments.some(p=>isToday(p.paidAt))).reduce((s,b)=>s+b.amountPaid,0);
+  const todayRev = [...ACTIVE_FOLIOS,...FOLIOS].reduce((s,f)=>
+    s+f.lines.filter(l=>!l.voided&&l.entryType==='payment'&&isToday(l.postedAt)).reduce((ss,l)=>ss+l.amount_cr,0),0);
   const pendingEnd = ENDORSEMENTS.filter(e=>e.assignedTo===currentUser.id&&['open','acknowledged','in_progress'].includes(e.status)).length;
 
   // Room grid
@@ -724,11 +825,16 @@ function renderDashboard(){
       </div>
       <div class="card">
         <div class="card-title">Today's Departures <small>${dueOut} guests</small></div>
-        ${todayDepartures.length ? `<table><thead><tr><th>Guest</th><th>Room</th><th>Action</th></tr></thead><tbody>
+        ${todayDepartures.length ? `<table><thead><tr><th>Guest</th><th>Room</th><th>Balance</th><th>Action</th></tr></thead><tbody>
         ${todayDepartures.map(r=>{
           const g=guest(r.guestId); const rm=room(r.roomId);
+          const folio=getFolio(r.id); const bal=getFolioBalance(folio);
           return `<tr><td><strong>${g.name}</strong></td><td>${rm.number}</td>
-          <td><button class="btn btn-primary btn-xs" onclick="doCheckout('${r.id}')">Check Out</button></td></tr>`;
+          <td><span style="color:${bal>0?'var(--amber-light)':'var(--green-light)'};font-weight:600">${peso(bal)}</span></td>
+          <td>
+            <button class="btn btn-secondary btn-xs" onclick="showFolio('${r.id}')" style="margin-right:4px">📂 Folio</button>
+            <button class="btn btn-primary btn-xs" onclick="doCheckout('${r.id}')" ${bal>0?`disabled style="opacity:0.4;cursor:not-allowed" title="Settle balance first"`:''}>${bal>0?'🔒 Blocked':'Check Out'}</button>
+          </td></tr>`;
         }).join('')}</tbody></table>` : `<div class="empty-state" style="padding:20px"><p>No departures today</p></div>`}
       </div>
     </div>
@@ -803,9 +909,14 @@ function renderReservations(){
 
 function buildResTable(list){
   if(!list.length) return `<div class="empty-state"><div class="empty-icon">📋</div><p>No reservations found</p></div>`;
-  return `<table><thead><tr><th>Reservation #</th><th>Guest</th><th>Room</th><th>Check-in</th><th>Check-out</th><th>Nights</th><th>Status</th><th>Actions</th></tr></thead><tbody>
+  return `<table><thead><tr><th>Reservation #</th><th>Guest</th><th>Room</th><th>Check-in</th><th>Check-out</th><th>Nights</th><th>Status</th><th>Balance</th><th>Actions</th></tr></thead><tbody>
   ${list.map(r=>{
     const g=guest(r.guestId); const rm=room(r.roomId); const rt=roomType(rm.typeId);
+    const folio=getFolio(r.id);
+    const bal=getFolioBalance(folio);
+    const balDisplay = r.status==='checked_in'
+      ? `<span style="color:${bal>0?'var(--amber-light)':bal<0?'var(--blue-light)':'var(--green-light)'}; font-weight:600">${peso(bal)}</span>`
+      : `<span class="text-dim">—</span>`;
     return `<tr>
       <td class="text-gold">${r.num}</td>
       <td><strong>${g.name}</strong>${g.isSenior?'<br><span class="chip">SC</span>':''}${g.isPWD?'<br><span class="chip">PWD</span>':''}${g.isVIP?'<span class="chip" style="color:var(--gold)">VIP</span>':''}</td>
@@ -814,11 +925,13 @@ function buildResTable(list){
       <td>${formatDate(r.checkOut)}</td>
       <td>${r.nights}N</td>
       <td>${resBadge(r.status)}</td>
-      <td>
+      <td>${balDisplay}</td>
+      <td style="white-space:nowrap">
         ${r.status==='reserved'?`<button class="btn btn-success btn-xs" onclick="doCheckin('${r.id}')">Check In</button> `:''}
-        ${r.status==='checked_in'?`<button class="btn btn-primary btn-xs" onclick="doCheckout('${r.id}')">Check Out</button> `:''}
+        ${r.status==='checked_in'?`<button class="btn btn-secondary btn-xs" onclick="showFolio('${r.id}')">📂 Folio</button> `:''}
+        ${r.status==='checked_in'?`<button class="btn btn-primary btn-xs" onclick="doCheckout('${r.id}')" ${bal>0?`disabled title="Settle balance first" style="opacity:0.4;cursor:not-allowed"`:''}>${bal>0?'🔒':''} Check Out</button> `:''}
         ${['reserved','checked_in'].includes(r.status)?`<button class="btn btn-secondary btn-xs" onclick="viewReservation('${r.id}')">View</button> `:''}
-        ${r.status==='checked_out'?`<button class="btn btn-secondary btn-xs" onclick="viewBillByRes('${r.id}')">Invoice</button> `:''}
+        ${r.status==='checked_out'?`<button class="btn btn-secondary btn-xs" onclick="showFolio('${r.id}')">📂 Folio</button> `:''}
         ${r.status==='reserved'&&(can('cancellation_approve')||can('all'))?`<button class="btn btn-danger btn-xs" onclick="cancelReservation('${r.id}')">Cancel</button>`:''}
       </td>
     </tr>`;
@@ -879,7 +992,8 @@ function viewReservation(resId){
     </div>
   `,`
     ${r.status==='reserved'?`<button class="btn btn-success" onclick="doCheckin('${r.id}');closeModal()">✓ Check In</button>`:''}
-    ${r.status==='checked_in'?`<button class="btn btn-primary" onclick="doCheckout('${r.id}');closeModal()">Check Out</button>`:''}
+    ${r.status==='checked_in'?`<button class="btn btn-primary" onclick="closeModal();showFolio('${r.id}')">📂 Open Folio</button>`:''}
+    ${r.status==='checked_out'?`<button class="btn btn-secondary" onclick="closeModal();showFolio('${r.id}')">📂 View Folio</button>`:''}
     <button class="btn btn-secondary" onclick="closeModal()">Close</button>
   `);
 }
@@ -969,72 +1083,680 @@ function doCheckin(resId){
   }
   r.status='checked_in';
   if(rm) rm.status='nci';
+  // Create folio
+  createFolio(r);
   addAudit('Check-in',`Guest ${g.name} checked into Room ${rm?.number} (${r.num})`);
-  navigate(document.getElementById('topbar-title').textContent==='Dashboard'?'dashboard':'reservations');
-  showToast(`${g.name} checked in to Room ${rm?.number}`);
+  // Open folio immediately after check-in
+  showFolio(resId);
+}
+
+function createFolio(res){
+  // Don't duplicate
+  if(getFolio(res.id)) return;
+  const rt = roomType(room(res.roomId).typeId);
+  const folio = {
+    id:'af'+Date.now(), resId:res.id, guestId:res.guestId, roomId:res.roomId,
+    status:'open', createdAt:new Date().toISOString(), closedAt:'', lines:[]
+  };
+  // Post Night 1 room rate immediately
+  const line = {
+    id:nextFolioLineId(), entryType:'charge', chargeType:'Room Rate',
+    desc:`Room Rate — ${rt.name} (Night 1)`, voucherNum:'',
+    amount_dr:rt.rate, amount_cr:0, runBal:rt.rate,
+    payMethod:'', receiptType:'', receiptNum:'', cardLast4:'', cardType:'', cardApproval:'',
+    postedBy:currentUser.id, postedAt:new Date().toISOString(), voided:false
+  };
+  // Extra bed Night 1
+  if(res.extraBed && rt.extraBedRate){
+    folio.lines.push(line);
+    folio.lines.push({...line, id:nextFolioLineId(), chargeType:'Extra Bed', desc:`Extra Bed (Night 1)`, amount_dr:rt.extraBedRate, runBal:rt.rate+rt.extraBedRate});
+  } else {
+    folio.lines.push(line);
+  }
+  ACTIVE_FOLIOS.push(folio);
+  addAudit('Folio Created',`Folio opened for ${res.num} — Night 1 room rate posted`);
 }
 
 function doCheckout(resId){
   const r = RESERVATIONS.find(rv=>rv.id===resId);
   if(!r) return;
+  const folio = getFolio(resId);
+  const balance = getFolioBalance(folio);
+  if(balance > 0){
+    showToast(`Cannot check out — outstanding balance of ${peso(balance)}. Please settle the folio first.`,'warn');
+    showFolio(resId);
+    return;
+  }
   const rm = ROOMS.find(rm=>rm.id===r.roomId);
   const g = guest(r.guestId);
   r.status='checked_out';
   if(rm) rm.status='vd';
+  if(folio){ folio.status='closed'; folio.closedAt=new Date().toISOString(); }
   // Auto-create HK task
-  const hkId = 'hk'+Date.now();
-  HK_TASKS.push({id:hkId,roomId:r.roomId,taskType:'Room Cleaning',assignedTo:[],status:'pending',scheduledDate:fmt(today),notes:'Auto-created on checkout',createdBy:currentUser.id,createdAt:new Date().toISOString(),completedAt:'',supervisorNotes:''});
-  // Generate draft bill
-  generateBill(r);
-  addAudit('Check-out',`Guest ${g.name} checked out from Room ${rm?.number} (${r.num})`);
-  navigate(document.getElementById('topbar-title').textContent==='Dashboard'?'dashboard':'reservations');
-  showToast(`${g.name} checked out. Bill generated. HK task created.`);
+  HK_TASKS.push({id:'hk'+Date.now(),roomId:r.roomId,taskType:'Room Cleaning',assignedTo:[],status:'pending',scheduledDate:fmt(today),notes:'Auto-created on checkout',createdBy:currentUser.id,createdAt:new Date().toISOString(),completedAt:'',supervisorNotes:''});
+  addAudit('Check-out',`Guest ${g.name} checked out from Room ${rm?.number} (${r.num}). Balance settled.`);
+  const page = document.getElementById('topbar-title').textContent;
+  navigate(page==='Dashboard'?'dashboard':'reservations');
+  showToast(`${g.name} checked out. Room set to Vacant Dirty. HK task created.`);
 }
 
-function generateBill(res){
+// ── FOLIO SYSTEM ──────────────────────────────────────────────
+
+function showFolio(resId){
+  const res = reservation(resId);
+  const g = guest(res.guestId);
   const rm = room(res.roomId);
   const rt = roomType(rm.typeId);
-  const g = guest(res.guestId);
-  const baseRate = rt.rate * res.nights;
-  const extraBedAmt = res.extraBed ? (rt.extraBedRate||0)*res.nights : 0;
-  const subtotal = baseRate + extraBedAmt;
-  // Discounts
-  const discounts = [];
-  let discTotal = 0;
-  if(g.isSenior){ const d=Math.round(subtotal*0.20); discounts.push({id:'bd'+Date.now(),type:'senior',label:'Senior Citizen Discount 20%',amount:d,approvedBy:'system'}); discTotal+=d; }
-  else if(g.isPWD){ const d=Math.round(subtotal*0.20); discounts.push({id:'bd'+Date.now()+'p',type:'pwd',label:'PWD Discount 20%',amount:d,approvedBy:'system'}); discTotal+=d; }
-  const loyaltyApplied = res.loyaltyApplied && g.isLoyalty;
-  if(loyaltyApplied){ const d=Math.round(subtotal*HOTEL.loyaltyDiscount/100); discounts.push({id:'bd'+Date.now()+'l',type:'loyalty',label:`Loyalty Discount ${HOTEL.loyaltyDiscount}%`,amount:d,approvedBy:'system'}); discTotal+=d; }
-  const discountedSub = subtotal - discTotal;
-  // Taxes
-  const vatExempt = g.isSenior || g.isPWD;
-  const vatReason = g.isSenior?'Senior Citizen Exempt':g.isPWD?'PWD Exempt':'';
-  let vatAmt = 0;
-  if(!vatExempt){
-    if(rt.vatConfig==='inclusive') vatAmt = Math.round(discountedSub/1.12*0.12);
-    else vatAmt = Math.round(discountedSub*0.12);
-  }
-  const scAmt = Math.round(discountedSub*0.10);
-  const taxes = [
-    {id:'bt'+Date.now(),name:'VAT 12%',rate:12,amount:vatAmt,isApplied:!vatExempt,reason:vatReason,toggledBy:vatExempt?'system':''},
-    {id:'bt'+Date.now()+'s',name:'Service Charge 10%',rate:10,amount:scAmt,isApplied:true,reason:'',toggledBy:''},
-  ];
-  const totalTax = taxes.filter(t=>t.isApplied).reduce((s,t)=>s+t.amount,0);
-  const grand = discountedSub + totalTax;
-  const charges = [
-    {id:'bc'+Date.now(),desc:`Room Rate (${rt.name} × ${res.nights} nights)`,amount:baseRate,qty:1},
-  ];
-  if(res.extraBed) charges.push({id:'bc'+Date.now()+'e',desc:`Extra Bed × ${res.nights} nights`,amount:extraBedAmt,qty:1});
-  const bill = {
-    id:'b'+Date.now(),num:nextInvNum(),resId:res.id,guestId:res.guestId,status:'open',
-    charges,taxes,discounts,payments:[],
-    subtotal,totalDiscount:discTotal,totalTax,grandTotal:grand,amountPaid:0,balance:grand,
-    createdAt:new Date().toISOString(),createdBy:currentUser.id,
-  };
-  BILLING.push(bill);
-  addAudit('Bill Created',`Invoice ${bill.num} generated for ${res.num}`);
-  return bill;
+  const folio = getFolio(resId);
+  if(!folio){ showToast('No folio found for this reservation.','warn'); return; }
+
+  const balance = getFolioBalance(folio);
+  const isOpen = folio.status === 'open';
+  const canVoid = can('all') || can('billing_override');
+
+  const balClass = balance > 0 ? 'owed' : balance < 0 ? 'credit' : 'zero';
+  const balLabel = balance > 0 ? 'Balance Due' : balance < 0 ? 'Credit (Overpayment)' : 'Settled ✓';
+
+  // Build ledger rows
+  const ledgerRows = folio.lines.map(l=>{
+    const rowClass = l.voided ? 'void-row' : l.entryType==='payment' ? 'payment-row' : l.entryType==='discount' ? 'adjustment-row' : 'charge-row';
+    const drCell = l.amount_dr > 0 ? `<span class="dr">${peso(l.amount_dr)}</span>` : `<span class="text-dim">—</span>`;
+    const crCell = l.amount_cr > 0 ? `<span class="cr">${peso(l.amount_cr)}</span>` : `<span class="text-dim">—</span>`;
+    const runClass = l.runBal > 0 ? 'owed' : l.runBal < 0 ? 'credit' : 'zero';
+    let refHtml = '';
+    if(l.receiptType) refHtml += `<span class="ref-badge">${l.receiptType}: ${l.receiptNum}</span>`;
+    if(l.voucherNum) refHtml += `<span class="ref-badge">CV: ${l.voucherNum}</span>`;
+    if(l.cardLast4) refHtml += `<span class="ref-badge">${l.cardType} ****${l.cardLast4}</span>`;
+    return `<tr class="${rowClass}" id="fline-${l.id}">
+      <td style="white-space:nowrap;color:var(--white-faint)">${formatDateTime(l.postedAt)}</td>
+      <td>${l.chargeType?`<span style="font-size:10px;color:var(--white-faint);text-transform:uppercase;letter-spacing:1px">${l.chargeType}</span><br>`:''}${l.desc}${refHtml?`<div style="margin-top:2px">${refHtml}</div>`:''}</td>
+      <td style="text-align:right">${drCell}</td>
+      <td style="text-align:right">${crCell}</td>
+      <td style="text-align:right"><span class="bal ${runClass}">${l.voided?'<span style="opacity:0.4">VOID</span>':peso(l.runBal)}</span></td>
+      <td style="text-align:right">${!l.voided&&canVoid&&isOpen?`<button class="btn btn-danger btn-xs" onclick="voidFolioLine('${resId}','${l.id}')">Void</button>`:''}${l.voided?'<span class="text-dim" style="font-size:10px">Voided</span>':''}</td>
+      <td style="font-size:11px;color:var(--white-faint)">${staffName(l.postedBy)==='Unknown'?'System':staffName(l.postedBy)}</td>
+    </tr>`;
+  }).join('');
+
+  // Tags
+  const tags = [
+    g.isSenior ? `<span class="chip" style="color:var(--amber-light)">Senior Citizen</span>` : '',
+    g.isPWD ? `<span class="chip" style="color:var(--blue-light)">PWD</span>` : '',
+    g.isVIP ? `<span class="chip" style="color:var(--gold)">VIP</span>` : '',
+    g.isLoyalty ? `<span class="chip" style="color:var(--green-light)">Loyalty ${g.loyaltyTier} · ${g.loyaltyCard}</span>` : '',
+  ].filter(Boolean).join('');
+
+  // Footer actions
+  const checkoutStatus = balance > 0
+    ? `<div class="checkout-blocked">🔒 Check-out blocked — Outstanding balance: <strong>${peso(balance)}</strong>. Please post full payment before checking out.</div>`
+    : `<div class="checkout-ready">✓ Balance settled — Ready to check out.</div>`;
+
+  openModal('modal-lg', `📂 Guest Folio — ${res.num}`, `
+    <div class="folio-header">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px">
+        <div>
+          <div style="font-size:18px;font-weight:500">${g.name}</div>
+          <div class="text-sm text-dim" style="margin-top:3px">Room ${rm.number} · ${rt.name} · Floor ${rm.floor}</div>
+          <div class="text-sm text-dim">Check-in: ${formatDate(res.checkIn)} → Check-out: ${formatDate(res.checkOut)} (${res.nights}N)</div>
+          <div style="margin-top:8px">${tags}</div>
+        </div>
+        <div style="text-align:right">
+          <div class="folio-balance ${balClass}">${peso(Math.abs(balance))}</div>
+          <div class="text-sm" style="color:var(--white-faint);margin-top:4px">${balLabel}</div>
+          <div class="text-sm text-dim" style="margin-top:2px">${folio.status==='open'?'<span style="color:var(--green-light)">● Folio Open</span>':'<span style="color:var(--white-faint)">● Folio Closed</span>'}</div>
+        </div>
+      </div>
+    </div>
+
+    ${isOpen ? `<div class="folio-action-bar">
+      <button class="btn btn-primary btn-sm" onclick="showPostPayment('${resId}')">💳 Post Payment</button>
+      <button class="btn btn-secondary btn-sm" onclick="showAddFolioCharge('${resId}')">+ Add Charge</button>
+      ${g.isSenior||g.isPWD||g.isLoyalty ? `<button class="btn btn-secondary btn-sm" onclick="showApplyFolioDiscount('${resId}')">% Apply Discount</button>` : ''}
+      ${canVoid ? `<button class="btn btn-secondary btn-sm" onclick="showAddFolioTax('${resId}')">+ Post Tax</button>` : ''}
+      <button class="btn btn-secondary btn-sm" onclick="printFolio('${resId}')">🖨 Print Folio</button>
+    </div>` : `<div class="folio-action-bar">
+      <button class="btn btn-secondary btn-sm" onclick="printFolio('${resId}')">🖨 Print Folio</button>
+    </div>`}
+
+    <div style="overflow-x:auto;max-height:380px;overflow-y:auto;border:1px solid var(--navy-border);border-radius:var(--radius)">
+      <table class="folio-ledger">
+        <thead>
+          <tr>
+            <th>Date/Time</th>
+            <th>Description</th>
+            <th style="text-align:right">Charge (Dr)</th>
+            <th style="text-align:right">Payment (Cr)</th>
+            <th style="text-align:right">Balance</th>
+            <th></th>
+            <th>Posted By</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${folio.lines.length ? ledgerRows : `<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--white-faint)">No entries yet</td></tr>`}
+        </tbody>
+        <tfoot>
+          <tr style="background:rgba(0,0,0,0.2)">
+            <td colspan="2" style="padding:10px;font-weight:600;font-size:13px">TOTAL</td>
+            <td style="text-align:right;padding:10px;font-weight:600;color:var(--white)">${peso(folio.lines.filter(l=>!l.voided).reduce((s,l)=>s+l.amount_dr,0))}</td>
+            <td style="text-align:right;padding:10px;font-weight:600;color:var(--green-light)">${peso(folio.lines.filter(l=>!l.voided).reduce((s,l)=>s+l.amount_cr,0))}</td>
+            <td style="text-align:right;padding:10px;font-weight:700;font-size:15px" class="${balClass}">${peso(Math.abs(balance))}</td>
+            <td colspan="2"></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    ${isOpen ? `<div style="margin-top:16px">${checkoutStatus}</div>` : ''}
+  `, `
+    ${isOpen && balance === 0 ? `<button class="btn btn-primary" onclick="closeModal();doCheckout('${resId}')">✓ Proceed to Check-out</button>` : ''}
+    ${isOpen && balance > 0 ? `<button class="btn btn-primary" onclick="showPostPayment('${resId}')">💳 Post Payment</button>` : ''}
+    <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+  `);
 }
+
+// ── POST PAYMENT MODAL ────────────────────────────────────────
+function showPostPayment(resId){
+  const res = reservation(resId);
+  const folio = getFolio(resId);
+  const balance = getFolioBalance(folio);
+  const g = guest(res.guestId);
+
+  openModal('modal-md', '💳 Post Payment', `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding:12px 16px;background:var(--navy-light);border-radius:var(--radius)">
+      <div>
+        <div style="font-size:13px;color:var(--white-faint)">Guest</div>
+        <div style="font-weight:500">${g.name}</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:13px;color:var(--white-faint)">Current Balance</div>
+        <div class="folio-balance owed" style="font-size:24px">${peso(balance)}</div>
+      </div>
+    </div>
+
+    <div class="form-row col2">
+      <div class="form-field">
+        <label>Payment Method</label>
+        <select id="pp-method" onchange="togglePaymentFields()">
+          <option value="Cash">Cash</option>
+          <option value="Visa/MC">Visa / Mastercard</option>
+          <option value="GCash">GCash</option>
+          <option value="Maya">Maya</option>
+          <option value="Bank Transfer">Bank Transfer</option>
+          <option value="On Account">On Account (Corporate)</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label>Amount</label>
+        <input type="number" id="pp-amount" value="${Math.max(0,balance).toFixed(2)}" min="0.01" step="0.01">
+      </div>
+    </div>
+
+    <!-- Card fields (shown when Visa/MC) -->
+    <div id="pp-card-fields" style="display:none">
+      <div class="form-row col3">
+        <div class="form-field"><label>Card Type</label>
+          <select id="pp-cardtype"><option>Visa</option><option>Mastercard</option><option>Amex</option><option>JCB</option></select>
+        </div>
+        <div class="form-field"><label>Last 4 Digits</label>
+          <input type="text" id="pp-card4" maxlength="4" placeholder="1234" style="letter-spacing:4px">
+        </div>
+        <div class="form-field"><label>Approval Code (opt.)</label>
+          <input type="text" id="pp-approval" placeholder="APC-XXXX">
+        </div>
+      </div>
+    </div>
+
+    <!-- Reference number (GCash, Maya, Bank) -->
+    <div id="pp-ref-field" style="display:none">
+      <div class="form-row">
+        <div class="form-field"><label>Reference Number</label>
+          <input type="text" id="pp-ref" placeholder="Transaction reference number">
+        </div>
+      </div>
+    </div>
+
+    <div class="form-row col2">
+      <div class="form-field">
+        <label>Receipt Type</label>
+        <select id="pp-rectype">
+          <option value="OR">Official Receipt (OR) — Full/Final Payment</option>
+          <option value="AR">Acknowledgment Receipt (AR) — Partial / Deposit</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label>Receipt Number</label>
+        <input type="text" id="pp-recnum" placeholder="e.g. OR-2026-00452">
+      </div>
+    </div>
+
+    <!-- Cash change calculator -->
+    <div id="pp-cash-calc" style="display:none;margin-top:4px">
+      <div class="form-field">
+        <label>Amount Tendered (Cash)</label>
+        <input type="number" id="pp-tendered" placeholder="0.00" oninput="calcChange()" min="0" step="0.01">
+      </div>
+      <div id="pp-change-display" class="alert alert-info mt-8" style="display:none"></div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-field"><label>Notes (optional)</label>
+        <input type="text" id="pp-notes" placeholder="Additional notes...">
+      </div>
+    </div>
+
+    <div id="pp-receipt-suggest" class="alert alert-info mt-8">
+      💡 Suggested receipt type: <strong>${balance <= 0 ? 'OR (Official Receipt) — Full settlement' : 'AR (Acknowledgment Receipt) — Partial payment'}</strong>
+    </div>
+  `, `
+    <button class="btn btn-primary" onclick="savePostPayment('${resId}')">Post Payment</button>
+    <button class="btn btn-secondary" onclick="showFolio('${resId}')">← Back to Folio</button>
+  `);
+
+  // Set suggested receipt type
+  document.getElementById('pp-rectype').value = balance > parseFloat(document.getElementById('pp-amount')?.value||0) ? 'AR' : 'OR';
+  togglePaymentFields();
+}
+
+function togglePaymentFields(){
+  const method = document.getElementById('pp-method')?.value;
+  const cardFields = document.getElementById('pp-card-fields');
+  const refField = document.getElementById('pp-ref-field');
+  const cashCalc = document.getElementById('pp-cash-calc');
+  if(cardFields) cardFields.style.display = method==='Visa/MC' ? 'block' : 'none';
+  if(refField) refField.style.display = ['GCash','Maya','Bank Transfer'].includes(method) ? 'block' : 'none';
+  if(cashCalc) cashCalc.style.display = method==='Cash' ? 'block' : 'none';
+}
+
+function calcChange(){
+  const tendered = parseFloat(document.getElementById('pp-tendered')?.value||0);
+  const amount = parseFloat(document.getElementById('pp-amount')?.value||0);
+  const display = document.getElementById('pp-change-display');
+  if(!display) return;
+  if(tendered > 0){
+    const change = tendered - amount;
+    display.style.display = 'block';
+    display.innerHTML = change >= 0
+      ? `Change: <strong>${peso(change)}</strong>`
+      : `<span style="color:var(--red-light)">Tendered amount is less than payment amount.</span>`;
+  } else {
+    display.style.display = 'none';
+  }
+}
+
+function savePostPayment(resId){
+  const folio = getFolio(resId);
+  if(!folio) return;
+  const method = document.getElementById('pp-method').value;
+  const amount = parseFloat(document.getElementById('pp-amount').value);
+  const recType = document.getElementById('pp-rectype').value;
+  const recNum = document.getElementById('pp-recnum').value.trim();
+  const notes = document.getElementById('pp-notes').value.trim();
+  const card4 = document.getElementById('pp-card4')?.value.trim()||'';
+  const cardType = document.getElementById('pp-cardtype')?.value||'';
+  const approval = document.getElementById('pp-approval')?.value.trim()||'';
+  const ref = document.getElementById('pp-ref')?.value.trim()||'';
+
+  if(isNaN(amount)||amount<=0){ showToast('Enter a valid amount.','warn'); return; }
+  if(!recNum){ showToast('Receipt number is required.','warn'); return; }
+  if(method==='Visa/MC'&&!card4){ showToast('Last 4 digits of card required.','warn'); return; }
+
+  const desc = method==='Visa/MC'
+    ? `Payment — ${cardType} ****${card4}${approval?' (Approval: '+approval+')':''}`
+    : `Payment — ${method}${ref?' (Ref: '+ref+')':''}${notes?' · '+notes:''}`;
+
+  const prevBal = getFolioBalance(folio);
+  const newBal = prevBal - amount;
+
+  const line = {
+    id:nextFolioLineId(), entryType:'payment', chargeType:'',
+    desc, voucherNum:'', amount_dr:0, amount_cr:amount, runBal:newBal,
+    payMethod:method, receiptType:recType, receiptNum:recNum,
+    cardLast4:card4, cardType, cardApproval:approval,
+    postedBy:currentUser.id, postedAt:new Date().toISOString(), voided:false
+  };
+  folio.lines.push(line);
+  recomputeRunningBal(folio);
+  addAudit('Payment Posted',`${peso(amount)} via ${method} posted to folio of ${reservation(resId).num} — ${recType}: ${recNum}`);
+  showFolio(resId);
+  showToast(`${peso(amount)} payment posted. ${recType} ${recNum}.`);
+}
+
+// ── ADD CHARGE MODAL ─────────────────────────────────────────
+function showAddFolioCharge(resId){
+  openModal('modal-md', '+ Add Charge to Folio', `
+    <div class="form-row col2">
+      <div class="form-field">
+        <label>Charge Type</label>
+        <select id="fc-type">
+          <option>Restaurant / F&B</option><option>Laundry</option><option>Minibar</option>
+          <option>Telephone</option><option>Parking</option><option>Spa / Recreation</option>
+          <option>Room Service</option><option>Damage</option><option>Miscellaneous</option><option>Other</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label>Amount (₱)</label>
+        <input type="number" id="fc-amount" value="0" min="0.01" step="0.01">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-field">
+        <label>Description</label>
+        <input type="text" id="fc-desc" placeholder="e.g. Dinner for 2 — restaurant charge">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-field">
+        <label>Charge Voucher Number <span style="color:var(--white-faint)">(from paper voucher)</span></label>
+        <input type="text" id="fc-voucher" placeholder="e.g. CV-2026-0451">
+      </div>
+    </div>
+    <div class="alert alert-info mt-8">📋 Enter the charge voucher number from the department slip (restaurant, laundry, etc.) for reference.</div>
+  `, `
+    <button class="btn btn-primary" onclick="saveFolioCharge('${resId}')">Post Charge</button>
+    <button class="btn btn-secondary" onclick="showFolio('${resId}')">← Back to Folio</button>
+  `);
+}
+
+function saveFolioCharge(resId){
+  const folio = getFolio(resId);
+  if(!folio) return;
+  const chargeType = document.getElementById('fc-type').value;
+  const amount = parseFloat(document.getElementById('fc-amount').value);
+  const desc = document.getElementById('fc-desc').value.trim();
+  const voucher = document.getElementById('fc-voucher').value.trim();
+  if(isNaN(amount)||amount<=0){ showToast('Enter a valid amount.','warn'); return; }
+  if(!desc){ showToast('Description is required.','warn'); return; }
+  if(!voucher){ showToast('Charge voucher number is required.','warn'); return; }
+  const prevBal = getFolioBalance(folio);
+  const line = {
+    id:nextFolioLineId(), entryType:'charge', chargeType,
+    desc, voucherNum:voucher, amount_dr:amount, amount_cr:0, runBal:prevBal+amount,
+    payMethod:'', receiptType:'', receiptNum:'', cardLast4:'', cardType:'', cardApproval:'',
+    postedBy:currentUser.id, postedAt:new Date().toISOString(), voided:false
+  };
+  folio.lines.push(line);
+  recomputeRunningBal(folio);
+  addAudit('Charge Posted',`${chargeType} ${peso(amount)} posted to folio of ${reservation(resId).num} — CV: ${voucher}`);
+  showFolio(resId);
+  showToast(`${chargeType} charge of ${peso(amount)} posted.`);
+}
+
+// ── APPLY DISCOUNT ────────────────────────────────────────────
+function showApplyFolioDiscount(resId){
+  const res = reservation(resId);
+  const g = guest(res.guestId);
+  const rt = roomType(room(res.roomId).typeId);
+  const baseCharge = rt.rate * res.nights;
+  openModal('modal-md','% Apply Discount',`
+    <div class="form-row">
+      <div class="form-field"><label>Discount Type</label>
+        <select id="fd-type" onchange="updateDiscountCalc('${resId}')">
+          ${g.isSenior?'<option value="senior">Senior Citizen 20% + VAT Exempt</option>':''}
+          ${g.isPWD?'<option value="pwd">PWD 20% + VAT Exempt</option>':''}
+          ${g.isLoyalty?`<option value="loyalty">Loyalty Discount ${HOTEL.loyaltyDiscount}% (${g.loyaltyTier})</option>`:''}
+          <option value="manual">Manual Override</option>
+        </select>
+      </div>
+    </div>
+    <div id="fd-manual" style="display:none">
+      <div class="form-row col2">
+        <div class="form-field"><label>Discount %</label><input type="number" id="fd-pct" value="0" min="0" max="100" oninput="updateDiscountCalc('${resId}')"></div>
+        <div class="form-field"><label>Or Fixed Amount ₱</label><input type="number" id="fd-fixed" value="0" min="0" oninput="updateDiscountCalc('${resId}')"></div>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-field"><label>ID / Reference Number</label>
+        <input type="text" id="fd-idnum" placeholder="${g.isSenior?g.idNumber:g.isPWD?g.idNumber:'Reference number'}">
+      </div>
+    </div>
+    <div id="fd-calc" class="alert alert-info mt-8"></div>
+  `,`
+    <button class="btn btn-primary" onclick="saveFolioDiscount('${resId}')">Apply Discount</button>
+    <button class="btn btn-secondary" onclick="showFolio('${resId}')">← Back to Folio</button>
+  `);
+  updateDiscountCalc(resId);
+}
+
+function updateDiscountCalc(resId){
+  const res = reservation(resId);
+  const g = guest(res.guestId);
+  const rt = roomType(room(res.roomId).typeId);
+  const baseCharge = rt.rate * res.nights;
+  const type = document.getElementById('fd-type')?.value;
+  const manualDiv = document.getElementById('fd-manual');
+  if(manualDiv) manualDiv.style.display = type==='manual' ? 'block':'none';
+  let amt = 0;
+  if(type==='senior'||type==='pwd') amt = Math.round(baseCharge*0.20);
+  else if(type==='loyalty') amt = Math.round(baseCharge*(HOTEL.loyaltyDiscount/100));
+  else if(type==='manual'){
+    const pct = parseFloat(document.getElementById('fd-pct')?.value||0);
+    const fixed = parseFloat(document.getElementById('fd-fixed')?.value||0);
+    amt = fixed > 0 ? fixed : Math.round(baseCharge*(pct/100));
+  }
+  const calc = document.getElementById('fd-calc');
+  if(calc) calc.innerHTML = `Estimated discount: <strong>${peso(amt)}</strong> off base room charges of ${peso(baseCharge)}`;
+}
+
+function saveFolioDiscount(resId){
+  const folio = getFolio(resId);
+  const res = reservation(resId);
+  const g = guest(res.guestId);
+  const rt = roomType(room(res.roomId).typeId);
+  const baseCharge = rt.rate * res.nights;
+  const type = document.getElementById('fd-type').value;
+  const idNum = document.getElementById('fd-idnum').value.trim();
+  if(!idNum){ showToast('ID/Reference number required.','warn'); return; }
+  let amt = 0, label = '';
+  if(type==='senior'){ amt=Math.round(baseCharge*0.20); label=`Senior Citizen Discount 20% + VAT Exempt — SC ID: ${idNum}`; }
+  else if(type==='pwd'){ amt=Math.round(baseCharge*0.20); label=`PWD Discount 20% + VAT Exempt — PWD ID: ${idNum}`; }
+  else if(type==='loyalty'){ amt=Math.round(baseCharge*(HOTEL.loyaltyDiscount/100)); label=`Loyalty Discount ${HOTEL.loyaltyDiscount}% (${g.loyaltyTier}) — Card: ${idNum}`; }
+  else {
+    const pct=parseFloat(document.getElementById('fd-pct')?.value||0);
+    const fixed=parseFloat(document.getElementById('fd-fixed')?.value||0);
+    amt = fixed>0 ? fixed : Math.round(baseCharge*(pct/100));
+    label = `Manual Discount${pct>0?' '+pct+'%':''} — Ref: ${idNum}`;
+  }
+  const prevBal = getFolioBalance(folio);
+  folio.lines.push({
+    id:nextFolioLineId(), entryType:'discount', chargeType:label.split(' ')[0]+' Discount',
+    desc:label, voucherNum:'', amount_dr:0, amount_cr:amt, runBal:prevBal-amt,
+    payMethod:'', receiptType:'', receiptNum:'', cardLast4:'', cardType:'', cardApproval:'',
+    postedBy:currentUser.id, postedAt:new Date().toISOString(), voided:false
+  });
+  recomputeRunningBal(folio);
+  addAudit('Discount Applied',`${label} — ${peso(amt)} on folio of ${res.num}`);
+  showFolio(resId);
+  showToast(`Discount of ${peso(amt)} applied.`);
+}
+
+// ── POST TAX TO FOLIO ─────────────────────────────────────────
+function showAddFolioTax(resId){
+  const res = reservation(resId);
+  const rt = roomType(room(res.roomId).typeId);
+  const folio = getFolio(resId);
+  const chargesOnly = folio.lines.filter(l=>!l.voided&&l.entryType==='charge').reduce((s,l)=>s+l.amount_dr,0);
+  const discountsOnly = folio.lines.filter(l=>!l.voided&&l.entryType==='discount').reduce((s,l)=>s+l.amount_cr,0);
+  const taxableBase = chargesOnly - discountsOnly;
+  const vatAmt = rt.vatConfig==='inclusive' ? Math.round(taxableBase/1.12*0.12) : Math.round(taxableBase*0.12);
+  const scAmt = Math.round(taxableBase*0.10);
+  openModal('modal-md','+ Post Tax to Folio',`
+    <div class="alert alert-info" style="margin-bottom:16px">Taxable base: <strong>${peso(taxableBase)}</strong></div>
+    <div class="form-row">
+      <div class="form-field"><label>Tax Type</label>
+        <select id="ft-type" onchange="updateTaxCalc(${vatAmt},${scAmt})">
+          <option value="vat">VAT 12% — ${peso(vatAmt)}</option>
+          <option value="sc">Service Charge 10% — ${peso(scAmt)}</option>
+          <option value="custom">Custom Tax Line</option>
+        </select>
+      </div>
+    </div>
+    <div id="ft-custom" style="display:none">
+      <div class="form-row col2">
+        <div class="form-field"><label>Tax Name</label><input type="text" id="ft-name" placeholder="e.g. Local Tourism Tax"></div>
+        <div class="form-field"><label>Amount ₱</label><input type="number" id="ft-amount" value="0" min="0"></div>
+      </div>
+    </div>
+    <div id="ft-preview" class="alert alert-warning mt-8"></div>
+  `,`
+    <button class="btn btn-primary" onclick="saveFolioTax('${resId}',${vatAmt},${scAmt})">Post Tax</button>
+    <button class="btn btn-secondary" onclick="showFolio('${resId}')">← Back to Folio</button>
+  `);
+  updateTaxCalc(vatAmt, scAmt);
+}
+
+function updateTaxCalc(vatAmt, scAmt){
+  const type = document.getElementById('ft-type')?.value;
+  const custom = document.getElementById('ft-custom');
+  const preview = document.getElementById('ft-preview');
+  if(custom) custom.style.display = type==='custom'?'block':'none';
+  if(preview){
+    const amt = type==='vat'?vatAmt:type==='sc'?scAmt:0;
+    preview.innerHTML = type!=='custom' ? `Will post ${peso(amt)} as a charge to folio` : 'Enter custom tax name and amount above';
+  }
+}
+
+function saveFolioTax(resId, vatAmt, scAmt){
+  const folio = getFolio(resId);
+  const type = document.getElementById('ft-type').value;
+  let amt=0, name='';
+  if(type==='vat'){ amt=vatAmt; name='VAT 12%'; }
+  else if(type==='sc'){ amt=scAmt; name='Service Charge 10%'; }
+  else { name=document.getElementById('ft-name').value.trim(); amt=parseFloat(document.getElementById('ft-amount').value)||0; }
+  if(!name||amt<=0){ showToast('Tax name and amount required.','warn'); return; }
+  const prevBal=getFolioBalance(folio);
+  folio.lines.push({
+    id:nextFolioLineId(), entryType:'charge', chargeType:name,
+    desc:name, voucherNum:'', amount_dr:amt, amount_cr:0, runBal:prevBal+amt,
+    payMethod:'', receiptType:'', receiptNum:'', cardLast4:'', cardType:'', cardApproval:'',
+    postedBy:currentUser.id, postedAt:new Date().toISOString(), voided:false
+  });
+  recomputeRunningBal(folio);
+  addAudit('Tax Posted',`${name} ${peso(amt)} posted to folio of ${reservation(resId).num}`);
+  showFolio(resId);
+  showToast(`${name} of ${peso(amt)} posted to folio.`);
+}
+
+// ── VOID FOLIO LINE ───────────────────────────────────────────
+function voidFolioLine(resId, lineId){
+  const folio = getFolio(resId);
+  if(!folio) return;
+  const line = folio.lines.find(l=>l.id===lineId);
+  if(!line) return;
+  const reason = prompt(`Void this line item?\n"${line.desc}"\n\nReason (required):`);
+  if(!reason) return;
+  line.voided = true;
+  recomputeRunningBal(folio);
+  addAudit('Folio Line Voided',`Line "${line.desc}" voided on folio of ${reservation(resId).num} — Reason: ${reason}`);
+  showFolio(resId);
+  showToast('Line item voided.');
+}
+
+// ── PRINT FOLIO ───────────────────────────────────────────────
+function printFolio(resId){
+  const res = reservation(resId);
+  const g = guest(res.guestId);
+  const rm = room(res.roomId);
+  const rt = roomType(rm.typeId);
+  const folio = getFolio(resId);
+  if(!folio) return;
+  const balance = getFolioBalance(folio);
+  const activeLines = folio.lines;
+  const w = window.open('','_blank','width=760,height:1000');
+  w.document.write(`<!DOCTYPE html><html><head><title>Folio ${res.num}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    body{font-family:'DM Sans',sans-serif;color:#1a1a1a;padding:32px;max-width:720px;margin:0 auto;font-size:12px;}
+    .hdr{text-align:center;margin-bottom:20px;border-bottom:2px solid #c9a84c;padding-bottom:12px;}
+    .hotel-nm{font-family:'Cormorant Garamond',serif;font-size:26px;letter-spacing:4px;color:#0d1b2a;}
+    .hotel-sub{font-size:10px;letter-spacing:2px;color:#888;margin-top:2px;}
+    .folio-title{font-size:16px;font-weight:700;letter-spacing:2px;margin:12px 0 4px;}
+    .guest-block{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0;padding:12px;background:#f9f7f2;border-radius:6px;}
+    .guest-block .lbl{font-size:10px;letter-spacing:1px;color:#888;text-transform:uppercase;}
+    .guest-block .val{font-size:13px;font-weight:500;}
+    table{width:100%;border-collapse:collapse;margin-top:12px;}
+    th{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#888;padding:7px 8px;text-align:left;border-bottom:2px solid #c9a84c;white-space:nowrap;}
+    td{padding:7px 8px;border-bottom:1px solid #eee;vertical-align:top;font-size:11px;}
+    .dr{text-align:right;color:#1a1a1a;font-weight:500;}
+    .cr{text-align:right;color:#2e7d5e;font-weight:500;}
+    .bal{text-align:right;font-weight:600;}
+    .voided{text-decoration:line-through;opacity:0.4;}
+    .tfoot-row{background:#f5f0e8;font-weight:700;}
+    .balance-box{margin-top:16px;padding:12px 16px;border:2px solid ${balance<=0?'#2e7d5e':'#d4830a'};border-radius:6px;display:flex;justify-content:space-between;align-items:center;}
+    .balance-lbl{font-size:13px;font-weight:600;}
+    .balance-val{font-size:22px;font-family:'Cormorant Garamond',serif;color:${balance<=0?'#2e7d5e':'#d4830a'};}
+    .settled-stamp{text-align:center;font-size:24px;font-weight:700;color:#2e7d5e;border:3px solid #2e7d5e;display:inline-block;padding:5px 18px;border-radius:4px;letter-spacing:4px;margin:12px 0;}
+    .sig{display:flex;justify-content:space-between;margin-top:36px;}
+    .sig-line{width:44%;border-top:1px solid #ccc;text-align:center;padding-top:5px;font-size:10px;color:#888;}
+    .footer{text-align:center;font-size:10px;color:#bbb;margin-top:20px;font-style:italic;}
+    .ref-badge{display:inline-block;background:#eee;border-radius:3px;padding:1px 5px;font-size:9px;color:#666;margin-left:3px;}
+    @media print{@page{margin:15mm;}}
+  </style></head><body>
+  <div class="hdr">
+    <div class="hotel-nm">AZURE HOTEL</div>
+    <div class="hotel-sub">${HOTEL.address}</div>
+    <div class="hotel-sub">${HOTEL.phone} · TIN: ${HOTEL.tin}</div>
+  </div>
+  <div style="text-align:center">
+    <div class="folio-title">GUEST FOLIO</div>
+    <div style="font-size:11px;color:#888">${res.num} · Printed: ${new Date().toLocaleString('en-PH')}</div>
+  </div>
+  <div class="guest-block">
+    <div><div class="lbl">Guest Name</div><div class="val">${g.name}</div></div>
+    <div><div class="lbl">Room</div><div class="val">${rm.number} — ${rt.name}</div></div>
+    <div><div class="lbl">Check-in</div><div class="val">${formatDate(res.checkIn)} · ${HOTEL.checkIn}</div></div>
+    <div><div class="lbl">Check-out</div><div class="val">${formatDate(res.checkOut)} · ${HOTEL.checkOut}</div></div>
+    <div><div class="lbl">Nights</div><div class="val">${res.nights}</div></div>
+    <div><div class="lbl">Folio Status</div><div class="val">${folio.status.toUpperCase()}</div></div>
+    ${g.isLoyalty?`<div><div class="lbl">Loyalty Card</div><div class="val">${g.loyaltyCard} (${g.loyaltyTier})</div></div>`:''}
+    ${g.isSenior?`<div><div class="lbl">Classification</div><div class="val">Senior Citizen</div></div>`:''}
+    ${g.isPWD?`<div><div class="lbl">Classification</div><div class="val">PWD</div></div>`:''}
+  </div>
+  <table>
+    <thead><tr>
+      <th>Date/Time</th><th>Description</th><th>Voucher/Ref</th>
+      <th class="dr">Charge (Dr)</th><th class="cr">Payment (Cr)</th><th class="bal">Balance</th>
+    </tr></thead>
+    <tbody>
+    ${activeLines.map(l=>`<tr class="${l.voided?'voided':''}">
+      <td style="white-space:nowrap">${formatDateTime(l.postedAt)}</td>
+      <td>${l.chargeType?`<span style="font-size:9px;text-transform:uppercase;color:#888">${l.chargeType}</span><br>`:''}${l.desc}
+        ${l.receiptType?`<span class="ref-badge">${l.receiptType}: ${l.receiptNum}</span>`:''}
+        ${l.cardLast4?`<span class="ref-badge">${l.cardType} ****${l.cardLast4}${l.cardApproval?' · '+l.cardApproval:''}</span>`:''}
+      </td>
+      <td>${l.voucherNum?`<span class="ref-badge">CV: ${l.voucherNum}</span>`:''}</td>
+      <td class="dr">${l.amount_dr>0?peso(l.amount_dr):'—'}</td>
+      <td class="cr">${l.amount_cr>0?peso(l.amount_cr):'—'}</td>
+      <td class="bal">${l.voided?'VOID':peso(l.runBal)}</td>
+    </tr>`).join('')}
+    </tbody>
+    <tfoot>
+      <tr class="tfoot-row">
+        <td colspan="3" style="padding:8px">TOTALS</td>
+        <td class="dr" style="padding:8px">${peso(activeLines.filter(l=>!l.voided).reduce((s,l)=>s+l.amount_dr,0))}</td>
+        <td class="cr" style="padding:8px">${peso(activeLines.filter(l=>!l.voided).reduce((s,l)=>s+l.amount_cr,0))}</td>
+        <td class="bal" style="padding:8px">${peso(balance)}</td>
+      </tr>
+    </tfoot>
+  </table>
+  <div class="balance-box">
+    <div class="balance-lbl">${balance<=0?'SETTLED / BALANCE DUE':'OUTSTANDING BALANCE'}</div>
+    <div class="balance-val">${peso(Math.abs(balance))}</div>
+  </div>
+  ${balance<=0?'<div style="text-align:center;margin:8px 0"><div class="settled-stamp">SETTLED</div></div>':''}
+  <div class="sig">
+    <div class="sig-line">Guest Signature</div>
+    <div class="sig-line">Prepared By · ${currentUser.name}</div>
+  </div>
+  <div class="footer">Thank you for choosing Azure Hotel · ${HOTEL.address} · ${HOTEL.phone}</div>
+  </body></html>`);
+  w.document.close();
+  setTimeout(()=>w.print(),600);
+}
+
+function viewBillByRes(resId){ showFolio(resId); }
+function generateBill(res){ /* Replaced by folio system */ }
+
+
 
 function cancelReservation(resId){
   const r = RESERVATIONS.find(rv=>rv.id===resId);
@@ -1047,12 +1769,6 @@ function cancelReservation(resId){
   addAudit('Reservation Cancelled',`${r.num} cancelled — Reason: ${reason}`);
   navigate('reservations');
   showToast('Reservation cancelled.');
-}
-
-function viewBillByRes(resId){
-  const b = BILLING.find(b=>b.resId===resId);
-  if(b) showBillDetail(b.id);
-  else showToast('No invoice found for this reservation.','warn');
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1112,7 +1828,7 @@ function filterGuests(){
 function viewGuest(gid){
   const g = guest(gid);
   const stays = RESERVATIONS.filter(r=>r.guestId===gid);
-  const totalSpend = BILLING.filter(b=>b.guestId===gid&&b.status==='paid').reduce((s,b)=>s+b.amountPaid,0);
+  const totalSpend = [...ACTIVE_FOLIOS,...FOLIOS].filter(f=>f.guestId===gid).reduce((s,f)=>s+f.lines.filter(l=>!l.voided&&l.entryType==='payment').reduce((ss,l)=>ss+l.amount_cr,0),0);
   openModal('modal-lg',g.name,`
     <div class="tabs">
       <div class="tab active" onclick="guestTab(this,'gt-profile')">Profile</div>
@@ -1230,37 +1946,44 @@ function quickResFromGuest(gid){ closeModal(); showNewReservation(); setTimeout(
 // BILLING
 // ═══════════════════════════════════════════════════════════════
 function renderBilling(){
+  const allFolios = [...ACTIVE_FOLIOS, ...FOLIOS];
   return `
     <div class="section-header">
-      <div><h2>Billing & Invoices</h2><p>Manage invoices, payments and tax lines</p></div>
+      <div><h2>Billing & Invoices</h2><p>Guest folios, ledgers and payment records</p></div>
     </div>
     <div class="filter-bar">
-      <input type="text" id="b-search" placeholder="Search invoice # or guest..." oninput="filterBilling()" style="width:280px">
+      <input type="text" id="b-search" placeholder="Search guest or reservation #..." oninput="filterBilling()" style="width:280px">
       <select id="b-status" onchange="filterBilling()">
-        <option value="">All Statuses</option>
-        <option value="open">Open</option><option value="partial">Partially Paid</option>
-        <option value="paid">Paid</option><option value="voided">Voided</option>
+        <option value="">All Folios</option>
+        <option value="open">Open (In-house)</option>
+        <option value="closed">Closed (Checked Out)</option>
       </select>
     </div>
-    <div class="card"><div class="table-wrap" id="bill-table-wrap">${buildBillTable(BILLING)}</div></div>`;
+    <div class="card"><div class="table-wrap" id="bill-table-wrap">${buildFolioTable(allFolios)}</div></div>`;
 }
 
-function buildBillTable(list){
-  if(!list.length) return `<div class="empty-state"><div class="empty-icon">₱</div><p>No invoices found</p></div>`;
-  return `<table><thead><tr><th>Invoice #</th><th>Guest</th><th>Reservation</th><th>Grand Total</th><th>Balance</th><th>Status</th><th>Actions</th></tr></thead><tbody>
-  ${list.map(b=>{
-    const g=guest(b.guestId); const r=reservation(b.resId);
+function buildFolioTable(list){
+  if(!list.length) return `<div class="empty-state"><div class="empty-icon">₱</div><p>No folios found</p></div>`;
+  return `<table><thead><tr><th>Reservation</th><th>Guest</th><th>Room</th><th>Check-in</th><th>Check-out</th><th>Total Charges</th><th>Total Payments</th><th>Balance</th><th>Status</th><th>Actions</th></tr></thead><tbody>
+  ${list.map(f=>{
+    const res=reservation(f.resId); const g=guest(f.guestId);
+    const rm=room(f.roomId); const rt=roomType(rm.typeId);
+    const totalDr=f.lines.filter(l=>!l.voided).reduce((s,l)=>s+l.amount_dr,0);
+    const totalCr=f.lines.filter(l=>!l.voided).reduce((s,l)=>s+l.amount_cr,0);
+    const bal=getFolioBalance(f);
     return `<tr>
-      <td class="text-gold">${b.num}</td>
-      <td>${g.name}</td>
-      <td class="text-dim">${r.num||'—'}</td>
-      <td>${peso(b.grandTotal)}</td>
-      <td>${b.balance>0?`<span style="color:var(--amber-light)">${peso(b.balance)}</span>`:peso(0)}</td>
-      <td>${billBadge(b.status)}</td>
+      <td class="text-gold">${res.num||'—'}</td>
+      <td><strong>${g.name}</strong>${g.isVIP?'<span class="chip" style="color:var(--gold);margin-left:4px">VIP</span>':''}</td>
+      <td>${rm.number} <span class="text-dim">${rt.name}</span></td>
+      <td class="text-dim">${formatDate(res.checkIn)}</td>
+      <td class="text-dim">${formatDate(res.checkOut)}</td>
+      <td>${peso(totalDr)}</td>
+      <td style="color:var(--green-light)">${peso(totalCr)}</td>
+      <td><span style="font-weight:600;color:${bal>0?'var(--amber-light)':bal<0?'var(--blue-light)':'var(--green-light)'}">${peso(Math.abs(bal))}${bal<0?' (CR)':''}</span></td>
+      <td><span class="badge ${f.status==='open'?'badge-ci':'badge-co'}">${f.status==='open'?'Open':'Closed'}</span></td>
       <td>
-        <button class="btn btn-secondary btn-xs" onclick="showBillDetail('${b.id}')">View</button>
-        ${b.status!=='paid'&&b.status!=='voided'?`<button class="btn btn-success btn-xs" onclick="addPayment('${b.id}')">+ Payment</button>`:''}
-        ${b.status!=='voided'&&currentUser.role==='admin'?`<button class="btn btn-danger btn-xs" onclick="voidBill('${b.id}')">Void</button>`:''}
+        <button class="btn btn-secondary btn-xs" onclick="showFolio('${f.resId}')">📂 Open Folio</button>
+        ${f.status==='open'&&bal>0?`<button class="btn btn-success btn-xs" onclick="showPostPayment('${f.resId}')">💳 Pay</button>`:''}
       </td>
     </tr>`;
   }).join('')}</tbody></table>`;
@@ -1269,224 +1992,12 @@ function buildBillTable(list){
 function filterBilling(){
   const q=(document.getElementById('b-search')?.value||'').toLowerCase();
   const st=document.getElementById('b-status')?.value||'';
-  const list=BILLING.filter(b=>{
-    const g=guest(b.guestId);
-    return (!q||g.name.toLowerCase().includes(q)||b.num.toLowerCase().includes(q))&&(!st||b.status===st);
+  const allFolios=[...ACTIVE_FOLIOS,...FOLIOS];
+  const list=allFolios.filter(f=>{
+    const g=guest(f.guestId); const res=reservation(f.resId);
+    return (!q||g.name.toLowerCase().includes(q)||(res.num||'').toLowerCase().includes(q))&&(!st||f.status===st);
   });
-  document.getElementById('bill-table-wrap').innerHTML=buildBillTable(list);
-}
-
-function showBillDetail(billId){
-  const b = BILLING.find(x=>x.id===billId);
-  if(!b) return;
-  const g = guest(b.guestId);
-  const res = reservation(b.resId);
-  const rm = room(res.roomId||'');
-  const rt = roomType(rm.typeId||'');
-  const canOverride = can('billing_override')||can('all');
-
-  const chargesHtml = b.charges.map(c=>`<div class="bill-line"><span class="bill-label">${c.desc}</span><span class="bill-amount">${peso(c.amount)}</span></div>`).join('');
-  const taxHtml = b.taxes.map(t=>`
-    <div class="bill-line">
-      <span class="bill-label" style="display:flex;align-items:center;gap:8px">
-        <label class="toggle" style="width:30px;height:16px"><input type="checkbox" ${t.isApplied?'checked':''} ${!canOverride?'disabled':''} onchange="toggleTaxLine('${billId}','${t.id}',this.checked)"><span class="toggle-slider"></span></label>
-        ${t.name} ${!t.isApplied&&t.reason?`<span class="text-sm text-dim">(${t.reason})</span>`:''}
-      </span>
-      <span class="bill-amount" style="${!t.isApplied?'text-decoration:line-through;opacity:0.4':''}">${peso(t.amount)}</span>
-    </div>`).join('');
-  const discHtml = b.discounts.length ? b.discounts.map(d=>`<div class="bill-line"><span class="bill-label">${d.label}</span><span class="bill-amount discount">- ${peso(d.amount)}</span></div>`).join('') : '<div class="text-dim text-sm" style="padding:6px 0">No discounts applied</div>';
-  const payHtml = b.payments.length ? b.payments.map(p=>`<div class="bill-line"><span class="bill-label">${p.method}${p.ref?' (Ref: '+p.ref+')':''}<br><span class="text-sm text-dim">${formatDateTime(p.paidAt)} · ${staffName(p.by)}</span></span><span class="bill-amount">${peso(p.amount)}</span></div>`).join('') : '<div class="text-dim text-sm" style="padding:6px 0">No payments recorded</div>';
-
-  openModal('modal-lg',`${b.num}`,`
-    <div class="grid2" style="gap:20px">
-      <div>
-        <div class="bill-section-title">Guest & Stay</div>
-        <div class="card" style="margin-bottom:12px">
-          <div style="font-size:15px;font-weight:500">${g.name}</div>
-          <div class="text-sm text-dim mt-8">${rm.number||'—'} — ${rt.name||'—'}</div>
-          <div class="text-sm text-dim">Check-in: ${formatDate(res.checkIn)} → ${formatDate(res.checkOut)} (${res.nights||'?'}N)</div>
-          <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
-            ${g.isSenior?'<span class="chip" style="color:var(--amber-light)">Senior Citizen</span>':''}
-            ${g.isPWD?'<span class="chip" style="color:var(--blue-light)">PWD</span>':''}
-            ${g.isLoyalty?`<span class="chip" style="color:var(--green-light)">Loyalty ${g.loyaltyTier}</span>`:''}
-          </div>
-        </div>
-
-        <div class="bill-section-title">Charges</div>
-        <div class="card" style="margin-bottom:12px">${chargesHtml}
-          ${can('billing_override')||can('all')?`<button class="btn btn-secondary btn-xs mt-8" onclick="addChargeToBill('${billId}')">+ Add Charge</button>`:''}
-        </div>
-
-        <div class="bill-section-title">Discounts</div>
-        <div class="card" style="margin-bottom:12px">${discHtml}</div>
-      </div>
-      <div>
-        <div class="bill-section-title">Tax Lines <span class="text-sm text-dim">(toggle to apply/remove)</span></div>
-        <div class="card" style="margin-bottom:12px">${taxHtml}</div>
-
-        <div class="bill-section-title">Summary</div>
-        <div class="card" style="margin-bottom:12px">
-          <div class="bill-line"><span class="bill-label">Subtotal</span><span class="bill-amount">${peso(b.subtotal)}</span></div>
-          <div class="bill-line"><span class="bill-label">Total Discounts</span><span class="bill-amount discount">- ${peso(b.totalDiscount)}</span></div>
-          <div class="bill-line"><span class="bill-label">Total Taxes</span><span class="bill-amount">${peso(b.totalTax)}</span></div>
-          <div class="bill-line total"><span class="bill-label">Grand Total</span><span class="bill-amount">${peso(b.grandTotal)}</span></div>
-          <div class="bill-line"><span class="bill-label">Amount Paid</span><span class="bill-amount">${peso(b.amountPaid)}</span></div>
-          <div class="bill-line"><span class="bill-label">Balance Due</span><span class="bill-amount" style="color:${b.balance>0?'var(--amber-light)':'var(--green-light)'}">${peso(b.balance)}</span></div>
-        </div>
-        <div class="bill-section-title">Status</div>
-        <div style="margin-bottom:12px">${billBadge(b.status)}</div>
-
-        <div class="bill-section-title">Payments</div>
-        <div class="card">${payHtml}</div>
-      </div>
-    </div>
-  `,`
-    ${b.status!=='paid'&&b.status!=='voided'?`<button class="btn btn-success" onclick="addPayment('${billId}');closeModal()">+ Record Payment</button>`:''}
-    <button class="btn btn-secondary" onclick="printInvoice('${billId}')">🖨 Print</button>
-    <button class="btn btn-secondary" onclick="closeModal()">Close</button>
-  `);
-}
-
-function toggleTaxLine(billId, taxId, checked){
-  const b = BILLING.find(x=>x.id===billId);
-  if(!b) return;
-  const canOverride = can('billing_override')||can('all');
-  if(!canOverride){ showToast('Supervisor approval required to modify tax lines.','warn'); return; }
-  if(!checked){
-    const reason = prompt('Reason for removing tax line (required):','Manager Approval');
-    if(!reason) return;
-    const t = b.taxes.find(t=>t.id===taxId);
-    if(t){ t.isApplied=false; t.reason=reason; t.toggledBy=currentUser.id; }
-    addAudit('Tax Line Toggled OFF',`${t?.name} removed from ${b.num} — Reason: ${reason}`);
-  } else {
-    const t = b.taxes.find(t=>t.id===taxId);
-    if(t){ t.isApplied=true; t.reason=''; }
-    addAudit('Tax Line Toggled ON',`${t?.name} re-applied on ${b.num}`);
-  }
-  recalcBill(b);
-  showBillDetail(billId);
-}
-
-function recalcBill(b){
-  b.totalTax = b.taxes.filter(t=>t.isApplied).reduce((s,t)=>s+t.amount,0);
-  b.grandTotal = (b.subtotal - b.totalDiscount) + b.totalTax;
-  b.balance = b.grandTotal - b.amountPaid;
-  if(b.balance<=0) b.status='paid';
-  else if(b.amountPaid>0) b.status='partial';
-}
-
-function addChargeToBill(billId){
-  const desc = prompt('Charge description (e.g. Minibar, Laundry):');
-  if(!desc) return;
-  const amt = parseFloat(prompt('Amount:'));
-  if(isNaN(amt)||amt<=0) return;
-  const b = BILLING.find(x=>x.id===billId);
-  if(!b) return;
-  b.charges.push({id:'bc'+Date.now(),desc,amount:amt,qty:1});
-  b.subtotal += amt;
-  recalcBill(b);
-  addAudit('Charge Added',`${desc} (${peso(amt)}) added to ${b.num}`);
-  showBillDetail(billId);
-}
-
-function addPayment(billId){
-  const b = BILLING.find(x=>x.id===billId);
-  if(!b) return;
-  openModal('modal-sm','Record Payment',`
-    <div class="form-field" style="margin-bottom:12px"><label>Payment Method</label>
-      <select id="pm-method"><option>Cash</option><option>Visa/MC</option><option>GCash</option><option>Maya</option><option>Bank Transfer</option><option>On Account</option></select>
-    </div>
-    <div class="form-field" style="margin-bottom:12px"><label>Amount</label>
-      <input type="number" id="pm-amount" value="${b.balance}" min="0.01" step="0.01">
-    </div>
-    <div class="form-field"><label>Reference # (optional)</label><input type="text" id="pm-ref" placeholder="Card / GCash ref #"></div>
-    <div class="alert alert-info mt-8">Balance Due: <strong>${peso(b.balance)}</strong></div>
-  `,`<button class="btn btn-primary" onclick="savePayment('${billId}')">Record Payment</button><button class="btn btn-secondary" onclick="closeModal()">Cancel</button>`);
-}
-
-function savePayment(billId){
-  const b = BILLING.find(x=>x.id===billId);
-  if(!b) return;
-  const method = document.getElementById('pm-method').value;
-  const amount = parseFloat(document.getElementById('pm-amount').value);
-  const ref = document.getElementById('pm-ref').value;
-  if(isNaN(amount)||amount<=0){ showToast('Invalid amount','warn'); return; }
-  b.payments.push({id:'bp'+Date.now(),method,amount,ref,paidAt:new Date().toISOString(),by:currentUser.id});
-  b.amountPaid += amount;
-  b.balance = Math.max(0, b.balance - amount);
-  if(b.balance<=0) b.status='paid';
-  else b.status='partial';
-  addAudit('Payment Recorded',`${peso(amount)} via ${method} for ${b.num}`);
-  closeModal();
-  navigate('billing');
-  showToast(`Payment of ${peso(amount)} recorded!`);
-}
-
-function voidBill(billId){
-  const b = BILLING.find(x=>x.id===billId);
-  if(!b) return;
-  const reason = prompt('Void reason (required):');
-  if(!reason) return;
-  b.status='voided';
-  addAudit('Bill Voided',`${b.num} voided by Admin — Reason: ${reason}`);
-  navigate('billing');
-  showToast('Invoice voided.');
-}
-
-function printInvoice(billId){
-  const b = BILLING.find(x=>x.id===billId);
-  if(!b) return;
-  const g = guest(b.guestId);
-  const res = reservation(b.resId);
-  const rm = room(res.roomId||'');
-  const rt = roomType(rm.typeId||'');
-  const w = window.open('','_blank','width=700,height=900');
-  w.document.write(`<!DOCTYPE html><html><head><title>Invoice ${b.num}</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
-  <style>body{font-family:'DM Sans',sans-serif;color:#1a1a1a;padding:40px;max-width:600px;margin:0 auto;}
-  .hdr{text-align:center;margin-bottom:24px;border-bottom:2px solid #c9a84c;padding-bottom:16px;}
-  .hotel-nm{font-family:'Cormorant Garamond',serif;font-size:28px;letter-spacing:4px;color:#0d1b2a;}
-  .hotel-sub{font-size:11px;letter-spacing:2px;color:#888;margin-top:4px;}
-  .inv-num{font-size:18px;font-weight:600;color:#c9a84c;margin:16px 0 4px;}
-  .section-ttl{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#888;margin:16px 0 6px;border-bottom:1px solid #eee;padding-bottom:4px;}
-  .line{display:flex;justify-content:space-between;padding:5px 0;font-size:13px;border-bottom:1px solid #f5f5f5;}
-  .line.total{border-top:2px solid #c9a84c;font-weight:700;font-size:16px;color:#0d1b2a;margin-top:8px;padding-top:10px;}
-  .line.disc{color:#2e7d5e;}.line.strike{text-decoration:line-through;opacity:0.4;}
-  .paid-stamp{text-align:center;font-size:28px;font-weight:700;color:#2e7d5e;border:3px solid #2e7d5e;display:inline-block;padding:6px 20px;border-radius:4px;transform:rotate(-5deg);margin:16px auto;letter-spacing:4px;}
-  .sig{display:flex;justify-content:space-between;margin-top:40px;}
-  .sig-line{width:44%;border-top:1px solid #ccc;text-align:center;padding-top:6px;font-size:11px;color:#888;}
-  .footer{text-align:center;font-size:11px;color:#aaa;margin-top:24px;font-style:italic;}
-  @media print{@page{margin:20mm;}}
-  </style></head><body>
-  <div class="hdr"><div class="hotel-nm">AZURE HOTEL</div><div class="hotel-sub">${HOTEL.address}</div><div class="hotel-sub">${HOTEL.phone} · TIN: ${HOTEL.tin}</div></div>
-  <div class="inv-num">INVOICE ${b.num}</div>
-  <div style="font-size:12px;color:#888">Date: ${formatDate(new Date().toISOString())}</div>
-  <div class="section-ttl">Guest & Stay</div>
-  <div class="line"><span>Guest</span><span><strong>${g.name}</strong></span></div>
-  <div class="line"><span>Room</span><span>${rm.number||'—'} — ${rt.name||'—'}</span></div>
-  <div class="line"><span>Check-in</span><span>${formatDate(res.checkIn)}</span></div>
-  <div class="line"><span>Check-out</span><span>${formatDate(res.checkOut)}</span></div>
-  <div class="line"><span>Nights</span><span>${res.nights||'?'}</span></div>
-  ${g.isLoyalty?`<div class="line"><span>Loyalty Card</span><span>${g.loyaltyCard}</span></div>`:''}
-  <div class="section-ttl">Charges</div>
-  ${b.charges.map(c=>`<div class="line"><span>${c.desc}</span><span>${peso(c.amount)}</span></div>`).join('')}
-  ${b.discounts.length?`<div class="section-ttl">Discounts</div>${b.discounts.map(d=>`<div class="line disc"><span>${d.label}</span><span>- ${peso(d.amount)}</span></div>`).join('')}`:''}
-  <div class="section-ttl">Taxes</div>
-  ${b.taxes.map(t=>`<div class="line ${!t.isApplied?'strike':''}"><span>${t.name}${!t.isApplied?' ('+t.reason+')':''}</span><span>${peso(t.amount)}</span></div>`).join('')}
-  <div class="line total"><span>GRAND TOTAL</span><span>${peso(b.grandTotal)}</span></div>
-  <div class="line"><span>Amount Paid</span><span>${peso(b.amountPaid)}</span></div>
-  <div class="line"><span>Balance Due</span><span>${peso(b.balance)}</span></div>
-  ${b.status==='paid'?'<div style="text-align:center;margin:16px 0"><div class="paid-stamp">PAID</div></div>':''}
-  <div class="section-ttl">Processed By</div>
-  <div style="font-size:12px">${staffName(b.createdBy)}</div>
-  <div class="sig">
-    <div class="sig-line">Guest Signature</div>
-    <div class="sig-line">Cashier Signature</div>
-  </div>
-  <div class="footer">Thank you for choosing Azure Hotel. We look forward to your next visit.</div>
-  </body></html>`);
-  w.document.close();
-  setTimeout(()=>w.print(),500);
+  document.getElementById('bill-table-wrap').innerHTML=buildFolioTable(list);
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -2129,25 +2640,27 @@ function changeRoomStatus(roomId){
 // REPORTS
 // ═══════════════════════════════════════════════════════════════
 function renderReports(){
-  const totalRooms=ROOMS.length;
-  const occupied=ROOMS.filter(r=>['oc','od','nci'].includes(r.status)).length;
-  const totalRev=BILLING.filter(b=>b.status==='paid').reduce((s,b)=>s+b.amountPaid,0);
-  const paidBills=BILLING.filter(b=>b.status==='paid');
-  const avgRate=paidBills.length?totalRev/paidBills.length:0;
+  const allFolios = [...ACTIVE_FOLIOS,...FOLIOS];
+  const totalRev = allFolios.reduce((s,f)=>s+f.lines.filter(l=>!l.voided&&l.entryType==='payment').reduce((ss,l)=>ss+l.amount_cr,0),0);
+  const paidFolios = allFolios.filter(f=>getFolioBalance(f)<=0&&f.lines.some(l=>l.entryType==='payment'));
+  const avgRate = paidFolios.length ? totalRev/paidFolios.length : 0;
+  const paymentMethods = {};
+  allFolios.forEach(f=>f.lines.filter(l=>!l.voided&&l.entryType==='payment').forEach(l=>{
+    paymentMethods[l.payMethod]=(paymentMethods[l.payMethod]||0)+l.amount_cr;
+  }));
 
-  const statusCounts={};
+  const totalRooms = ROOMS.length;
+  const occupied = ROOMS.filter(r=>['oc','od','nci'].includes(r.status)).length;
+  const statusCounts = {};
   Object.keys(STATUS_LABELS).forEach(k=>{statusCounts[k]=ROOMS.filter(r=>r.status===k).length;});
-
-  const paymentMethods={};
-  BILLING.forEach(b=>b.payments.forEach(p=>{paymentMethods[p.method]=(paymentMethods[p.method]||0)+p.amount;}));
 
   return `
     <div class="section-header"><div><h2>Reports</h2><p>Occupancy, revenue and operational analytics</p></div></div>
     <div class="stats-grid">
-      <div class="stat-card gold"><div class="stat-label">Total Revenue</div><div class="stat-value" style="font-size:22px">${peso(totalRev)}</div><div class="stat-sub">All paid invoices</div></div>
+      <div class="stat-card gold"><div class="stat-label">Total Revenue (Payments)</div><div class="stat-value" style="font-size:22px">${peso(totalRev)}</div><div class="stat-sub">All folio payments received</div></div>
       <div class="stat-card green"><div class="stat-label">Current Occupancy</div><div class="stat-value">${Math.round(occupied/totalRooms*100)}%</div><div class="stat-sub">${occupied}/${totalRooms} rooms</div></div>
-      <div class="stat-card blue"><div class="stat-label">Total Invoices</div><div class="stat-value">${BILLING.length}</div><div class="stat-sub">${paidBills.length} paid</div></div>
-      <div class="stat-card amber"><div class="stat-label">Avg. Invoice</div><div class="stat-value" style="font-size:22px">${peso(avgRate)}</div><div class="stat-sub">Per paid bill</div></div>
+      <div class="stat-card blue"><div class="stat-label">Active Folios</div><div class="stat-value">${ACTIVE_FOLIOS.length}</div><div class="stat-sub">${paidFolios.length} settled</div></div>
+      <div class="stat-card amber"><div class="stat-label">Avg. Per Folio</div><div class="stat-value" style="font-size:22px">${peso(avgRate)}</div><div class="stat-sub">Per settled folio</div></div>
     </div>
     <div class="grid2" style="gap:20px">
       <div class="card">
